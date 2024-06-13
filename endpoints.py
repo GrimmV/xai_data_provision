@@ -104,3 +104,60 @@ def endpoints(app, handler: DataHandler) -> None:
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
+
+    @app.route(
+        "{}/data/datapoint".format(base_url), methods=["GET", "OPTIONS"]
+    )
+    def get_datapoint():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            index = request.args.get("index", type=int)
+            with_impact = request.args.get("with_impact", default=False, type=is_it_true)
+            response = make_response(handler.get_datapoint(index, with_impact=with_impact))
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
+
+    @app.route(
+        "{}/xai/probabilities".format(base_url), methods=["GET", "OPTIONS"]
+    )
+    def get_probabilities():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            index = request.args.get("index", type=int)
+            response = make_response(handler.get_probabilities(index))
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
+
+
+    @app.route(
+        "{}/xai/trustscore".format(base_url), methods=["GET", "OPTIONS"]
+    )
+    def get_trustscore():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            index = request.args.get("index", type=int)
+            response = make_response(handler.get_trustscore(index))
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
+        
+        
+    @app.route(
+        "{}/xai/context".format(base_url), methods=["GET", "OPTIONS"]
+    )
+    def get_context():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            index = request.args.get("index", type=int)
+            feature = request.args.get("feature", type=str)
+            classname = request.args.get("classname", type=str)
+            response = make_response(handler.get_context(index, feature, classname))
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
