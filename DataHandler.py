@@ -144,7 +144,6 @@ class DataHandler:
             if str(label) not in classes:
                 continue
             for feature, values in features.items():
-                # print(feature)
                 if str(feature) not in feature_names:
                     continue
                 values_np = np.array(values)
@@ -189,10 +188,7 @@ class DataHandler:
         rng = limits["max"] - limits["min"]
         bin_width = rng / n_bins
 
-        print(class_list)
-
         if class_list == ["all"]:
-            print(feature_values, limits, bin_width, n_bins)
             bins = self._get_hist_bins(feature_values, limits, bin_width, n_bins)
             hist = {
                 "n_bins": n_bins,
@@ -205,7 +201,6 @@ class DataHandler:
             hist = {}
             for key in feature_values:
                 values = feature_values[key]
-                print(values)
                 bins = self._get_hist_bins(values, limits, bin_width, n_bins)
                 hist[key] = {
                     "n_bins": n_bins,
@@ -216,6 +211,20 @@ class DataHandler:
                 }
 
         return hist
+    
+    def get_correlation(self, kind="train"):
+        data_id = self.data_collection.find_one({'type': kind})["_id"]
+        datapoints = self.datapoint_collection.find({'data_id': data_id})
+        df = pd.DataFrame([datapoint['values'] for datapoint in datapoints])
+        custom_correlation_list=[]
+        
+        for key_outer, value_outer in df.corr().to_dict().items():
+            if (key_outer == "quality"): continue
+            for key_inner, value_inner in value_outer.items():
+                if (key_inner == "quality"): continue
+                custom_correlation_list.append({"f1": key_outer, "f2": key_inner, "correlation": value_inner})
+        
+        return custom_correlation_list
     
     def get_scatterplot(self, feature1: str, feature2: str, kind: str = "train"):
         label_name = self.label_name
@@ -240,8 +249,8 @@ class DataHandler:
         
         return {
             "datapoint": datapoint,
-            "prediction": prediction.prediction,
-            "shap_values": shap_values
+            "prediction": prediction["prediction"],
+            "shap_values": shap_values if shap_values else None
         }
     
     def get_probabilities(self, index, kind="test"):
@@ -267,14 +276,14 @@ class DataHandler:
 
     def get_context(self, index, feature, classname="auto"):
         prediction = self._get_prediction(index)
-        tmp_classname = classname if classname != "auto" else prediction.prediction
+        tmp_classname = classname if classname != "auto" else prediction["prediction"]
         datapoint = self._get_datapoint(index)
         feature_value = datapoint[feature]
         shap_values = self._get_shap(index, tmp_classname)
         shap_feature_value = shap_values[feature]
         anchor = self._get_anchor(index)
-        distribution = self.get_histogram(feature, tmp_classname, kind="test", bins=20)
-        overall_distribution = self.get_histogram(feature, "all", kind="test", bins=20)
+        distribution = self.get_histogram(feature, [tmp_classname], kind="test", bins=20)
+        overall_distribution = self.get_histogram(feature, ["all"], kind="test", bins=20)
 
         return {
             "feature": feature,
@@ -377,8 +386,6 @@ class DataHandler:
         anchor = self.anchor_collection.find_one(
             {"anchor_meta_id": anchor_meta["_id"], "index": int(index)}
         )
-
-        print([anchor_parser(elem) for elem in anchor["anchor"]])
 
         return {
             "anchor": anchor["anchor"],

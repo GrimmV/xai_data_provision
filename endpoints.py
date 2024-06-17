@@ -64,10 +64,8 @@ def endpoints(app, handler: DataHandler) -> None:
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
-        
-    @app.route(
-        "{}/data/statistics".format(base_url), methods=["GET", "OPTIONS"]
-    )
+
+    @app.route("{}/data/statistics".format(base_url), methods=["GET", "OPTIONS"])
     def get_statistics():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
@@ -81,14 +79,26 @@ def endpoints(app, handler: DataHandler) -> None:
             # define default
             if not feature_list:
                 feature_list = ["all"]
-            response = make_response(handler.get_statistics(kind, class_list, feature_list))
+            response = make_response(
+                handler.get_statistics(kind, class_list, feature_list)
+            )
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
 
-    @app.route(
-        "{}/data/distribution".format(base_url), methods=["GET", "OPTIONS"]
-    )
+    @app.route("{}/data/correlation".format(base_url), methods=["GET", "OPTIONS"])
+    def get_correlation():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            response = make_response(
+                handler.get_correlation()
+            )
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
+
+    @app.route("{}/data/distribution".format(base_url), methods=["GET", "OPTIONS"])
     def get_distribution():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
@@ -100,28 +110,30 @@ def endpoints(app, handler: DataHandler) -> None:
             if not class_list:
                 class_list = ["all"]
             bins = request.args.get("bins", default="auto", type=Union[str, int])
-            response = make_response(handler.get_histogram(feature, class_list, kind, bins))
+            response = make_response(
+                handler.get_histogram(feature, class_list, kind, bins)
+            )
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
 
-    @app.route(
-        "{}/data/datapoint".format(base_url), methods=["GET", "OPTIONS"]
-    )
+    @app.route("{}/data/datapoint".format(base_url), methods=["GET", "OPTIONS"])
     def get_datapoint():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
         elif request.method == "GET":
             index = request.args.get("index", type=int)
-            with_impact = request.args.get("with_impact", default=False, type=is_it_true)
-            response = make_response(handler.get_datapoint(index, with_impact=with_impact))
+            with_impact = request.args.get(
+                "with_impact", default=False, type=is_it_true
+            )
+            response = make_response(
+                handler.get_datapoint(index, with_impact=with_impact)
+            )
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
 
-    @app.route(
-        "{}/xai/probabilities".format(base_url), methods=["GET", "OPTIONS"]
-    )
+    @app.route("{}/xai/probabilities".format(base_url), methods=["GET", "OPTIONS"])
     def get_probabilities():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
@@ -132,24 +144,18 @@ def endpoints(app, handler: DataHandler) -> None:
         else:
             raise RuntimeError(default_error(request.method))
 
-
-    @app.route(
-        "{}/xai/trustscore".format(base_url), methods=["GET", "OPTIONS"]
-    )
+    @app.route("{}/xai/trustscore".format(base_url), methods=["GET", "OPTIONS"])
     def get_trustscore():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
         elif request.method == "GET":
             index = request.args.get("index", type=int)
-            response = make_response(handler.get_trustscore(index))
+            response = make_response(handler.get_trusscore(index))
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
-        
-        
-    @app.route(
-        "{}/xai/context".format(base_url), methods=["GET", "OPTIONS"]
-    )
+
+    @app.route("{}/xai/context".format(base_url), methods=["GET", "OPTIONS"])
     def get_context():
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
