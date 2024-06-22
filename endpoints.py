@@ -5,6 +5,20 @@ from typing import Union
 
 from DataHandler import DataHandler
 
+allFeatures = [
+    "fixed acidity",
+    "volatile acidity",
+    "citric acid",
+    "residual sugar",
+    "chlorides",
+    "free sulfur dioxide",
+    "total sulfur dioxide",
+    "density",
+    "pH",
+    "sulphates",
+    "alcohol",
+]
+
 default_error = lambda method: "Weird - don't know how to handle method {}".format(
     method
 )
@@ -91,9 +105,7 @@ def endpoints(app, handler: DataHandler) -> None:
         if request.method == "OPTIONS":
             return _build_cors_preflight_response()
         elif request.method == "GET":
-            response = make_response(
-                handler.get_correlation()
-            )
+            response = make_response(handler.get_correlation())
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
@@ -113,6 +125,23 @@ def endpoints(app, handler: DataHandler) -> None:
             response = make_response(
                 handler.get_histogram(feature, class_list, kind, bins)
             )
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
+
+    @app.route("{}/data/distribution/full".format(base_url), methods=["GET", "OPTIONS"])
+    def get_all_distributions():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            kind = request.args.get("kind", default="train", type=str)
+            bins = 50
+            histograms = {}
+            for feature in allFeatures:
+                histograms[feature] = handler.get_histogram(
+                    feature, ["all"], kind, bins
+                )
+            response = make_response(histograms)
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))

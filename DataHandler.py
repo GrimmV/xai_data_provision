@@ -222,7 +222,7 @@ class DataHandler:
             if (key_outer == "quality"): continue
             for key_inner, value_inner in value_outer.items():
                 if (key_inner == "quality"): continue
-                custom_correlation_list.append({"f1": key_outer, "f2": key_inner, "correlation": value_inner})
+                custom_correlation_list.append({"f1": key_outer, "f2": key_inner, "correlation": round(value_inner, 3)})
         
         return custom_correlation_list
     
