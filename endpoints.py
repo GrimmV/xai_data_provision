@@ -119,7 +119,9 @@ def endpoints(app, handler: DataHandler) -> None:
             kind = request.args.get("kind", default="train", type=str)
             class_list = request.args.getlist("class_list", type=str)
             # define default
-            if not class_list:
+            if feature == "all":
+                feature = "alcohol"
+            if not class_list or class_list == "all":
                 class_list = ["all"]
             bins = request.args.get("bins", default="auto", type=Union[str, int])
             response = make_response(
@@ -179,7 +181,7 @@ def endpoints(app, handler: DataHandler) -> None:
             return _build_cors_preflight_response()
         elif request.method == "GET":
             index = request.args.get("index", type=int)
-            response = make_response(handler.get_trusscore(index))
+            response = make_response(handler.get_trustscore(index))
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
@@ -190,8 +192,10 @@ def endpoints(app, handler: DataHandler) -> None:
             return _build_cors_preflight_response()
         elif request.method == "GET":
             index = request.args.get("index", type=int)
-            feature = request.args.get("feature", type=str)
-            classname = request.args.get("classname", type=str)
+            feature = request.args.get("feature", default="auto", type=str)
+            if feature == "auto":
+                feature = "alcohol"
+            classname = request.args.get("class", default="auto", type=str)
             response = make_response(handler.get_context(index, feature, classname))
             return _corsify_actual_response(response)
         else:

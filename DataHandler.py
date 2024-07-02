@@ -170,7 +170,7 @@ class DataHandler:
     ) -> Dict:
 
         datapoints = self._get_data(kind)
-        n_datapoints = len(datapoints)
+        # n_datapoints = len(datapoints)
         all_feature_values = [
             feature_value["values"][feature] for feature_value in datapoints
         ]
@@ -181,7 +181,8 @@ class DataHandler:
 
         if bins == "auto":
             # "The Square Root Choice" for bin_number
-            n_bins = int(math.ceil(math.sqrt(n_datapoints)))
+            # n_bins = int(math.ceil(math.sqrt(n_datapoints)))
+            n_bins = 30
         else:
             n_bins = bins
         limits = {"min": min(all_feature_values), "max": max(all_feature_values)}
