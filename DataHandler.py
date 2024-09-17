@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-import math
 from collections import defaultdict
 from typing import Union, List, Dict
 from sklearn.metrics import confusion_matrix
@@ -64,6 +63,18 @@ class DataHandler:
 
         return self.transform_metrics(model_scores["general"], kind)
 
+    def get_descriptions(self, general):
+        # features_raw = await requests.get('http://localhost:5000/api/v1/data/features')
+        # labels_raw = await requests.get('http://localhost:5000/api/v1/data/labels')
+        
+        # features = features_raw.json()
+        # labels = labels_raw.json()
+        
+        # print(features)
+        # print(labels)
+        
+        return {"general": general}
+        
 
     def get_learning_curves(self, kinds=["train", "test"]) -> dict[str, list]:
         model_scores = self.model_scores.find_one({"model_id": self.model_id})

@@ -130,6 +130,42 @@ def endpoints(app, handler: DataHandler) -> None:
             return _corsify_actual_response(response)
         else:
             raise RuntimeError(default_error(request.method))
+        
+    
+    @app.route("{}/data/descriptions".format(base_url), methods=["GET", "OPTIONS"])
+    def get_descriptions():
+        if request.method == "OPTIONS":
+            return _build_cors_preflight_response()
+        elif request.method == "GET":
+            general = """
+                It is considered vinho verde, a unique product from the Minho (northwest)
+                region of Portugal. Medium in alcohol, is it particularly appreciated due
+                to its freshness (specially in the summer). This wine accounts for 15% of
+                the total Portuguese production, and around 10% is exported, mostly white
+                wine. Although there are red wine samples, with this machine learning
+                model only white wine samples were classified. The data was collected
+                from May/2004 to February/2007 using only protected designation of origin
+                samples that were tested at the official certification entity (CVRVV). The
+                CVRVV is an inter-professional organization with the goal of improving the
+                quality and marketing of vinho verde. The data were recorded by a
+                computerized system (iLab), which automatically manages the process of
+                wine sample testing from producer requests to laboratory and sensory
+                analysis. Each entry in the dataset denotes a given test (analytical or
+                sensory). During the preprocessing stage, the database was transformed in
+                order to include a distinct wine sample (with all tests) per row. To avoid
+                discarding examples, only the most common physicochemical tests were
+                selected. Below, the physicochemical statistics per dataset are presented.
+                Regarding the preferences, each sample was evaluated by a minimum of three
+                sensory assessors (using blind tastes), which graded the wine in a scale
+                that ranges from 0 (very bad) to 10 (excellent). The final sensory score
+                is given by the median of these evaluations.
+            """
+            response = make_response(
+                handler.get_descriptions(general)
+            )
+            return _corsify_actual_response(response)
+        else:
+            raise RuntimeError(default_error(request.method))
 
     @app.route("{}/data/distribution/full".format(base_url), methods=["GET", "OPTIONS"])
     def get_all_distributions():
